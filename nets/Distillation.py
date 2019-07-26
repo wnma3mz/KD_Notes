@@ -250,8 +250,7 @@ def gradient_svd(op, ds, dU, dV):
         DV_diag = tf.matrix_diag(tf.matrix_diag_part(DV))
         VSD = tf.matmul(tf.matrix_transpose(tf.matmul(V,S)), D)
         VS = tf.matmul(V,S)
-        grad = UD - tf.matmul(tf.matmul(U,DV_diag), V,transpose_b=True)
-             - tf.matmul(2*tf.matmul(U, msym(K*VSD)), VS,transpose_b=True)
+        grad = UD - tf.matmul(tf.matmul(U,DV_diag), V,transpose_b=True) - tf.matmul(2*tf.matmul(U, msym(K*VSD)), VS,transpose_b=True)
     else:
 
         KT = tf.matrix_transpose(

@@ -1,6 +1,7 @@
 # Self-supervised Knowledge Distillation using Singular Value Decomposition
 
-所有内容均来源于https://github.com/sseung0703/SSKD_SVD，本项目基于仅做了些许更改与笔记，作为备份，感谢作者的开源代码。
+所有内容均来源于https://github.com/sseung0703/SSKD_SVD
+本项目基于仅做了些许更改与笔记，作为备份，感谢作者的开源代码。
 
 ![Alt text](dist.png)
 ## Feature

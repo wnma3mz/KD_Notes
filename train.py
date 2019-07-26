@@ -13,15 +13,15 @@ from nets import nets_factory
 from preprocessing import preprocessing_factory
 from utils import distillation_learning_rate, GET_dataset, sigmoid, MODEL, _get_init_fn
 
-config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.5
+# config = tf.ConfigProto()
+# config.gpu_options.per_process_gpu_memory_fraction = 0.5
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['CUDA_VISIBLE_DEVICES']='2'
 
 # train_dir   =  '/home/dmsl/Documents/tf/svd/VGG/VGG'
 # train_dir = 'output_origin_ts'
-train_dir = 'output'
+train_dir = 'output_16x16'
 
 # dataset_dir = '/home/dmsl/Documents/data/tf/cifar100'
 dataset_dir = 'cifar-100-python'
@@ -50,7 +50,6 @@ weight_decay = 1e-4
 checkpoint_path = None
 #checkpoint_path   =  '/home/dmsl/Documents/tf/svd/mobile/mobile'
 ignore_missing_vars = True
-# main
 
 tf.logging.set_verbosity(tf.logging.INFO)
 

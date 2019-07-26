@@ -202,6 +202,6 @@ def VGG(image,
 
     end_points['Logits'] = logits
     return end_points
-VGG.default_image_size = 32
-# VGG.default_image_size = 16
+# VGG.default_image_size = 32
+VGG.default_image_size = 16
 

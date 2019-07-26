@@ -37,7 +37,7 @@ def preprocess_image(image, is_training):
         0：双线性差值。1：最近邻居法。2：双三次插值法。3：面积插值法。
         """
         image = tf.image.resize_images(image, (16, 16), method=0)
-        image = tf.image.resize_images(image, (32, 32), method=0)
+        # image = tf.image.resize_images(image, (32, 32), method=0)
 
         image = tf.to_float(image)
         print("image_shape: ", image.get_shape().as_list())
@@ -50,8 +50,8 @@ def preprocess_image(image, is_training):
             image = tf.image.random_flip_left_right(image)
             image = random_rotate(image, 15)
             image = tf.pad(image, [[4, 4], [4, 4], [0, 0]])
-            image = tf.random_crop(image, [32, 32, 3])
-            # image = tf.random_crop(image, [16, 16, 3])
+            # image = tf.random_crop(image, [32, 32, 3])
+            image = tf.random_crop(image, [16, 16, 3])
 
             tf.summary.image('aug_img', tf.expand_dims(image, 0))
         # """
