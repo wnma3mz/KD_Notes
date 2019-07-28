@@ -112,9 +112,6 @@ def VGG(image,
         # """
         # 根据T-DNN训练
         if is_training:
-            # large = sio.loadmat('VGG16.mat')
-            # 载入T-DNN的权重数据
-            large = sio.loadmat('trained_params.mat')
             with tf.variable_scope('teacher'):
                 online_learning = False
                 with tf.variable_scope('block0'):
@@ -126,10 +123,6 @@ def VGG(image,
                             1,
                             padding='SAME',
                             activation_fn=tf.nn.relu,
-                            weights_initializer=tf.constant_initializer(
-                                large['vgg6/block0/conv%d/weights' % i]),
-                            biases_initializer=tf.constant_initializer(
-                                large['vgg6/block0/conv%d/biases' % i]),
                             scope='conv%d' % i,
                             trainable=online_learning,
                             reuse=val)
@@ -144,10 +137,6 @@ def VGG(image,
                             1,
                             padding='SAME',
                             activation_fn=tf.nn.relu,
-                            weights_initializer=tf.constant_initializer(
-                                large['vgg6/block1/conv%d/weights' % i]),
-                            biases_initializer=tf.constant_initializer(
-                                large['vgg6/block1/conv%d/biases' % i]),
                             scope='conv%d' % i,
                             trainable=online_learning,
                             reuse=val)
@@ -162,10 +151,6 @@ def VGG(image,
                             1,
                             padding='SAME',
                             activation_fn=tf.nn.relu,
-                            weights_initializer=tf.constant_initializer(
-                                large['vgg6/block2/conv%d/weights' % i]),
-                            biases_initializer=tf.constant_initializer(
-                                large['vgg6/block2/conv%d/biases' % i]),
                             scope='conv%d' % i,
                             trainable=online_learning,
                             reuse=val)
@@ -181,10 +166,6 @@ def VGG(image,
                             1,
                             padding='SAME',
                             activation_fn=tf.nn.relu,
-                            weights_initializer=tf.constant_initializer(
-                                large['vgg6/block3/conv%d/weights' % i]),
-                            biases_initializer=tf.constant_initializer(
-                                large['vgg6/block3/conv%d/biases' % i]),
                             scope='conv%d' % i,
                             trainable=online_learning,
                             reuse=val)

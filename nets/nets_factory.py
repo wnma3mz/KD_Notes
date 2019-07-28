@@ -4,6 +4,7 @@ import functools
 import tensorflow as tf
 
 from nets import VGG
+from nets import VGG2
 from nets import VGG_teacher
 from nets import MobileNet
 from nets import ResNext
@@ -11,6 +12,7 @@ from tensorflow.contrib import slim
 
 networks_map = {
     'VGG': VGG.VGG,
+    'VGG2': VGG2.VGG,
     'VGG_teacher': VGG_teacher.VGG,
     'MobileNet': MobileNet.MobileNet,
     'ResNext': ResNext.ResNext,
@@ -18,6 +20,7 @@ networks_map = {
 
 arg_scopes_map = {
     'VGG': VGG.VGG_arg_scope,
+    'VGG2': VGG2.VGG_arg_scope,
     'VGG_teacher': VGG_teacher.VGG_arg_scope,
     'MobileNet': MobileNet.MobileNet_arg_scope,
     'ResNext': ResNext.ResNext_arg_scope,

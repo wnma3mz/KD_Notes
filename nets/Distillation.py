@@ -5,7 +5,9 @@ import tensorflow as tf
 
 def removenan_pair(X):
     with tf.variable_scope('remove_nan'):
+        # 学生和教师是否同时存在某值
         isfin_t = tf.logical_and(tf.is_finite(X[0]), tf.is_finite(X[1]))
+        # 下一组的学生和教师
         isfin_b = tf.logical_and(tf.is_finite(X[2]), tf.is_finite(X[3]))
 
         sz = X[0].get_shape().as_list()
@@ -15,6 +17,7 @@ def removenan_pair(X):
                      *tf.reduce_min(tf.cast(isfin_b,tf.float32),sh,keepdims=True)
         mask = isfin_batch * sz[0] / (tf.reduce_sum(isfin_batch) + 1e-3)
 
+        # 替换为0
         X[0] = tf.where(isfin_t, X[0], tf.zeros_like(X[0]))
         X[1] = tf.where(isfin_t, X[1], tf.zeros_like(X[1]))
         X[2] = tf.where(isfin_b, X[2], tf.zeros_like(X[2]))
@@ -73,7 +76,12 @@ def SVD(X, n, name=None):
 
 
 def Align_rsv(x, y, y_s, k):
-    # 矩阵对齐
+    """
+    矩阵对齐
+    x: 学生V
+    y: 教师V
+    y_s: 教师奇异值
+    """
     x_sz = x.get_shape().as_list()
 
     y = tf.slice(y, [0, 0, 0], [-1, -1, k])
@@ -83,6 +91,7 @@ def Align_rsv(x, y, y_s, k):
     x_temp = []
     r = tf.constant(np.array(list(range(x_sz[0]))).reshape(-1, 1, 1),
                     dtype=tf.int32)
+    # 相似度计算
     cosine = tf.matmul(x, y, transpose_a=True)
     index = tf.expand_dims(tf.cast(tf.argmax(tf.abs(cosine), 1), tf.int32), -1)
     for i in range(k):
@@ -100,14 +109,18 @@ def Align_rsv(x, y, y_s, k):
 
     cosine = tf.expand_dims(
         tf.matrix_diag_part(tf.matmul(x, y, transpose_a=True)), 1)
+    # greater_equal 判断cosine > 0.0（即是否为正）
+    # 正数处，就输出1，否则输出-1.。。。。
     sign = tf.where(tf.greater_equal(cosine, 0.0), tf.ones_like(cosine),
                     -1 * tf.ones_like(cosine))
     y *= sign
 
+    # 最后处理好的学生V和教师V
     return x, y
 
 
 def Radial_Basis_Function(student, teacher, ts, n):
+    # ts 教师的奇异值
     loss = []
     # VGG有四个矩阵，len(student)-1=3，最大为2
     for l in range(len(student) - 1):
@@ -116,6 +129,7 @@ def Radial_Basis_Function(student, teacher, ts, n):
                 # 当前矩阵与下一个矩阵
                 svt, svb = student[l:l + 2]
                 tvt, tvb = teacher[l:l + 2]
+                tst, tsb = ts[l:l + 2]
 
                 t_sz = svt.get_shape().as_list()
                 b_sz = svb.get_shape().as_list()
@@ -123,7 +137,6 @@ def Radial_Basis_Function(student, teacher, ts, n):
 
                 # print("t_sz: ", t_sz, "\t b_sz: ", b_sz, "t_sz: ", tb_sz)
                 n = min(n, b_sz[2], tb_sz[2])
-                tst, tsb = ts[l:l + 2]
 
                 svt, tvt = Align_rsv(svt, tvt, tst, n)
                 svb, tvb = Align_rsv(svb, tvb, tsb, n)
@@ -136,8 +149,10 @@ def Radial_Basis_Function(student, teacher, ts, n):
                 tvt = tf.reshape(tvt, [t_sz[0], -1, 1, n])
                 tvb = tf.reshape(tvb, [b_sz[0], 1, -1, n])
 
+                # exp(-(t0-t1)^2/8)
                 s_rbf = tf.exp(-1 * tf.square(svt - svb) / 8)
                 t_rbf = tf.exp(-1 * tf.square(tvt - tvb) / 8)
+                # rbf的l2损失
                 rbf_loss = tf.nn.l2_loss(
                     (s_rbf - tf.stop_gradient(t_rbf))) * np.sqrt(n)
 
@@ -176,7 +191,7 @@ def crop_removenan(x, scale=True):
     isfin = tf.is_finite(x)
     # 矩阵shape a x k x k。sh: list(range(3))[1:]-> [1,2]
     sh = list(range(len(x.get_shape().as_list())))[1:]
-    # 
+    #
     isfin_batch = tf.reduce_min(tf.cast(isfin, tf.float32), sh, keepdims=True)
 
     x = tf.where(isfin, x, tf.zeros_like(x))
@@ -203,7 +218,7 @@ def gradient_svd(op, ds, dU, dV):
     u_sz = dU.get_shape().as_list()
     s_sz = ds.get_shape().as_list()
     v_sz = dV.get_shape().as_list()
- 
+
     num_vec = 4
     # k截断部分，最多5个，s_sz[-1] 每层中奇异值个数
     # 如果奇异值个数大于5个，那么就只保留5个，否则就不变
@@ -245,12 +260,14 @@ def gradient_svd(op, ds, dU, dV):
         D = tf.matmul(dV, s_1)
         # 求梯度
         # 截断后的矩阵，需要提前转置D
-        UD = tf.matmul(U,D,transpose_b=True)
-        DV = tf.matmul(D,V,transpose_a=True)
+        UD = tf.matmul(U, D, transpose_b=True)
+        DV = tf.matmul(D, V, transpose_a=True)
         DV_diag = tf.matrix_diag(tf.matrix_diag_part(DV))
-        VSD = tf.matmul(tf.matrix_transpose(tf.matmul(V,S)), D)
-        VS = tf.matmul(V,S)
-        grad = UD - tf.matmul(tf.matmul(U,DV_diag), V,transpose_b=True) - tf.matmul(2*tf.matmul(U, msym(K*VSD)), VS,transpose_b=True)
+        VSD = tf.matmul(tf.matrix_transpose(tf.matmul(V, S)), D)
+        VS = tf.matmul(V, S)
+        grad = UD - tf.matmul(tf.matmul(
+            U, DV_diag), V, transpose_b=True) - tf.matmul(
+                2 * tf.matmul(U, msym(K * VSD)), VS, transpose_b=True)
     else:
 
         KT = tf.matrix_transpose(
@@ -258,6 +275,6 @@ def gradient_svd(op, ds, dU, dV):
                 tf.eye(s_sz[-1], batch_shape=[s_sz[0]]) == 1.0,
                 tf.zeros_like(k), k))
         mmul_USV = mmul([U, S, msym(KT * tf.matmul(V, dV, transpose_a=True))])
-        grad = tf.matmul(2 *mmul_USV,V,transpose_b=True)
+        grad = tf.matmul(2 * mmul_USV, V, transpose_b=True)
 
     return [crop_removenan(grad)]

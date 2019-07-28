@@ -13,15 +13,17 @@ from nets import nets_factory
 from preprocessing import preprocessing_factory
 from utils import distillation_learning_rate, GET_dataset, sigmoid, MODEL, _get_init_fn
 
+# 限制GPU显存
 # config = tf.ConfigProto()
 # config.gpu_options.per_process_gpu_memory_fraction = 0.5
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ['CUDA_VISIBLE_DEVICES']='2'
+os.environ['CUDA_VISIBLE_DEVICES']='0'
+# export CUDA_VISIBLE_DEVICES=1
 
 # train_dir   =  '/home/dmsl/Documents/tf/svd/VGG/VGG'
 # train_dir = 'output_origin_ts'
-train_dir = 'output_16x16'
+train_dir = 'output_ResNext'
 
 # dataset_dir = '/home/dmsl/Documents/data/tf/cifar100'
 dataset_dir = 'cifar-100-python'
@@ -29,7 +31,7 @@ dataset_dir = 'cifar-100-python'
 
 dataset_name = 'cifar100'
 # model_name = ['VGG', 'VGG_teacher', 'MobileNet', 'ResNext']
-model_name = 'VGG'
+model_name = 'ResNext'
 # model_name   = 'VGG16'
 
 preprocessing_name = 'cifar100'
@@ -54,7 +56,7 @@ ignore_missing_vars = True
 tf.logging.set_verbosity(tf.logging.INFO)
 
 with tf.Graph().as_default() as graph:
-    ## Load Dataset
+    # Load Dataset
     epoch, global_step, dataset, image, label = GET_dataset(
         dataset_name, dataset_dir, batch_size, preprocessing_name, 'train')
     _, _, val_dataset, val_image, val_label = GET_dataset(
@@ -102,7 +104,7 @@ with tf.Graph().as_default() as graph:
     summaries = set(tf.get_collection(tf.GraphKeys.SUMMARIES))
     summary_op = tf.summary.merge(list(summaries), name='summary_op')
 
-    #%% for validation
+    # for validation
     def ts_fn(session, *args, **kwargs):
         total_loss, should_stop = slim.learning.train_step(
             session, *args, **kwargs)

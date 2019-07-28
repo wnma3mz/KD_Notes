@@ -1,3 +1,6 @@
 output*/
 cifar*/
 datasets/cifar*/
+*/__pycache__
+*/*.pyc
+*.mat
