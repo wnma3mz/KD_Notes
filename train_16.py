@@ -18,12 +18,12 @@ from utils import distillation_learning_rate, GET_dataset, sigmoid, MODEL, _get_
 # config.gpu_options.per_process_gpu_memory_fraction = 0.5
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ['CUDA_VISIBLE_DEVICES']='0'
+os.environ['CUDA_VISIBLE_DEVICES']='1'
 # export CUDA_VISIBLE_DEVICES=1
 
 # train_dir   =  '/home/dmsl/Documents/tf/svd/VGG/VGG'
 # train_dir = 'output_origin_ts'
-train_dir = 'output_MobileNet'
+train_dir = 'output_ResNext_16x16'
 
 # dataset_dir = '/home/dmsl/Documents/data/tf/cifar100'
 dataset_dir = 'cifar-100-python'
@@ -31,7 +31,7 @@ dataset_dir = 'cifar-100-python'
 
 dataset_name = 'cifar100'
 # model_name = ['VGG', 'VGG_teacher', 'MobileNet', 'ResNext']
-model_name = 'MobileNet'
+model_name = 'ResNext'
 # model_name   = 'VGG16'
 
 preprocessing_name = 'cifar100'

@@ -41,4 +41,5 @@ def preprocess_image(image, is_training):
             image = tf.pad(image, [[4, 4], [4, 4], [0, 0]])
             image = tf.random_crop(image, [32, 32, 3])
             tf.summary.image('aug_img', tf.expand_dims(image, 0))
+
         return image
