@@ -13,15 +13,22 @@ from torchvision.datasets import CIFAR10
 from Nets import BasicBlock, Bottleneck, ResNet
 from utils import evlation
 
+
 class _ConvLayer(nn.Sequential):
     def __init__(self, num_input_features, num_output_features, drop_rate):
         super(_ConvLayer, self).__init__()
-        
-        self.add_module('conv', nn.Conv2d(num_input_features, num_output_features,
-                        kernel_size=3, stride=1, padding=1, bias=False)),
+
+        self.add_module(
+            'conv',
+            nn.Conv2d(num_input_features,
+                      num_output_features,
+                      kernel_size=3,
+                      stride=1,
+                      padding=1,
+                      bias=False)),
         self.add_module('relu', nn.ReLU(inplace=True)),
         self.add_module('norm', nn.BatchNorm2d(num_output_features)),
-        
+
         self.drop_rate = drop_rate
 
     def forward(self, x):
@@ -30,19 +37,20 @@ class _ConvLayer(nn.Sequential):
             x = F.dropout(x, p=self.drop_rate, training=self.training)
         return x
 
+
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
-        
+
         self.features = nn.Sequential()
         self.features.add_module('convlayer1', _ConvLayer(3, 32, 0.0))
         self.features.add_module('maxpool', nn.MaxPool2d(2, 2))
         self.features.add_module('convlayer3', _ConvLayer(32, 64, 0.0))
         self.features.add_module('avgpool', nn.AvgPool2d(2, 2))
         self.features.add_module('convlayer5', _ConvLayer(64, 128, 0.0))
-        
+
         self.classifier = nn.Linear(128, 10)
-        
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight)
@@ -51,16 +59,17 @@ class CNN(nn.Module):
                 nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
                 nn.init.constant_(m.bias, 0)
-                
+
     def forward(self, x):
         features = self.features(x)
-        out = F.avg_pool2d(features, kernel_size=8, stride=1).view(features.size(0), -1)
+        out = F.avg_pool2d(features, kernel_size=8,
+                           stride=1).view(features.size(0), -1)
         out = self.classifier(out)
         return out
 
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 device_ids = [0, 3, 4]
-
 
 transform_train = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
@@ -85,11 +94,14 @@ testset = CIFAR10(root='./cifar10',
                   transform=transform_test)
 
 trainloader = DataLoader(trainset,
-                         batch_size=100*len(device_ids),
+                         batch_size=100 * len(device_ids),
                          shuffle=False,
                          num_workers=2)
 
-testloader = DataLoader(testset, batch_size=100*len(device_ids), shuffle=False, num_workers=2)
+testloader = DataLoader(testset,
+                        batch_size=100 * len(device_ids),
+                        shuffle=False,
+                        num_workers=2)
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse',
            'ship', 'truck')
@@ -97,11 +109,9 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse',
 net = CNN()
 net = nn.DataParallel(net, device_ids=device_ids).cuda()
 
-
 criterion = nn.CrossEntropyLoss()
 criterion2 = nn.KLDivLoss()  # 相对熵
 optimizer = optim.Adam(net.parameters(), lr=0.001)
-
 
 # 载入教师模型
 netT = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=10)
@@ -118,9 +128,9 @@ T = 2
 alpha = 0.95
 for epoch in range(3):
     time_start = time.time()
-    
+
     data_train = DataLoader(trainset,
-                            batch_size=batch_size*len(device_ids),
+                            batch_size=batch_size * len(device_ids),
                             shuffle=True,
                             num_workers=0)
 
@@ -151,9 +161,9 @@ for epoch in range(3):
         optimizer.step()
 
     print('[%d, %5d] loss: %.4f loss1: %.4f loss2: %.4f' %
-            (epoch + 1,
-            (i + 1) * batch_size, loss.item(), loss1.item(), loss2.item()))
-    
+          (epoch + 1,
+           (i + 1) * batch_size, loss.item(), loss1.item(), loss2.item()))
+
     evlation(net, testloader, device, classes)
 
     # torch.save(net, 'student.pkl')

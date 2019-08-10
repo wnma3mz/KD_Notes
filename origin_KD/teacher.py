@@ -13,7 +13,6 @@ from torch.utils.data import DataLoader
 from Nets import BasicBlock, Bottleneck, ResNet
 from utils import evlation
 
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 device_ids = [0, 3, 4]
 
@@ -22,7 +21,7 @@ transform = transforms.Compose([
     transforms.RandomHorizontalFlip(),
     transforms.RandomCrop(32),
     transforms.ToTensor(),
- ])
+])
 
 # transform_test = transforms.Compose([
 #     transforms.ToTensor(),
@@ -39,9 +38,15 @@ testset = CIFAR10(root='./cifar10',
                   download=False,
                   transform=transform)
 
-trainloader = DataLoader(trainset, batch_size=32*len(device_ids), shuffle=True, num_workers=0)
+trainloader = DataLoader(trainset,
+                         batch_size=32 * len(device_ids),
+                         shuffle=True,
+                         num_workers=0)
 
-testloader = DataLoader(testset, batch_size=32*len(device_ids), shuffle=False, num_workers=0)
+testloader = DataLoader(testset,
+                        batch_size=32 * len(device_ids),
+                        shuffle=False,
+                        num_workers=0)
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse',
            'ship', 'truck')
@@ -59,7 +64,6 @@ batch_size = 32
 
 for epoch in range(3):
 
-
     if epoch >= 100:
         optimizer = optim.SGD(net.parameters(),
                               lr=0.01,
@@ -72,7 +76,7 @@ for epoch in range(3):
                               weight_decay=5e-4)
 
     data_train = DataLoader(trainset,
-                            batch_size=batch_size*len(device_ids),
+                            batch_size=batch_size * len(device_ids),
                             shuffle=True,
                             num_workers=0)
     time_start = time.time()
@@ -81,7 +85,6 @@ for epoch in range(3):
 
         inputs, labels = data
         inputs, labels = inputs.cuda(), labels.cuda()
-
 
         outputs = net(inputs)
         loss = criterion(outputs, labels)
@@ -92,8 +95,9 @@ for epoch in range(3):
 
     time_end = time.time()
 
-    print('[%d, %5d] loss: %.4f time: %.4f' % (epoch + 1,
-                                (i + 1) * batch_size, loss.item(), time_end - time_start))
+    print('[%d, %5d] loss: %.4f time: %.4f' %
+          (epoch + 1,
+           (i + 1) * batch_size, loss.item(), time_end - time_start))
 
     evlation(net, testloader, device, classes)
     #torch.save(net, 'teacher.pkl')

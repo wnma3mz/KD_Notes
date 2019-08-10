@@ -22,16 +22,15 @@ from datasets import cifar10
 from datasets import cifar100
 from datasets import imgnet32
 
-
 datasets_map = {
-    'cifar10':cifar10,
-    'cifar100':cifar100,
-    'imgnet32':imgnet32,
+    'cifar10': cifar10,
+    'cifar100': cifar100,
+    'imgnet32': imgnet32,
 }
 
 
 def get_dataset(name, split_name, dataset_dir, file_pattern=None, reader=None):
     if name not in datasets_map:
         raise ValueError('Name of dataset unknown %s' % name)
-    return datasets_map[name].get_split(split_name, dataset_dir,
-                                        file_pattern, reader)
+    return datasets_map[name].get_split(split_name, dataset_dir, file_pattern,
+                                        reader)

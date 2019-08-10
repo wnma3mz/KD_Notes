@@ -5,6 +5,8 @@ from nets import nets_factory
 from datasets import dataset_factory
 from tensorflow.contrib import slim
 
+# 训练时用到的函数全部迁移到此py文件
+
 
 def sigmoid(x, k):
     return 1 / (1 + tf.exp(-(x - k)))
@@ -48,6 +50,7 @@ def GET_dataset(dataset_name, dataset_dir, batch_size, preprocessing_name,
         threads = 16
         is_training = False
     with tf.variable_scope('dataset_%s' % split):
+        # 载入数据集
         dataset = dataset_factory.get_dataset(dataset_name, split, dataset_dir)
         with tf.device('/device:CPU:0'):
             if split == 'train':
@@ -67,7 +70,7 @@ def GET_dataset(dataset_name, dataset_dir, batch_size, preprocessing_name,
                 common_queue_capacity=dataset.num_samples,
                 common_queue_min=0)
         images, labels = provider.get(['image', 'label'])
-
+        # 预处理
         image_preprocessing_fn = preprocessing_factory.get_preprocessing(
             preprocessing_name, is_training)
         images = image_preprocessing_fn(images)
@@ -122,13 +125,13 @@ def MODEL(model_name,
                             val=not (is_training))
     losses = []
 
-
     if is_training:
 
         def scale_grad(x, scale):
             return scale * x + tf.stop_gradient((1 - scale) * x)
 
         with tf.variable_scope('Student_loss'):
+            # 计算损失和精度
             loss = tf.losses.softmax_cross_entropy(label, end_points['Logits'])
             accuracy = slim.metrics.accuracy(
                 tf.to_int32(tf.argmax(end_points['Logits'], 1)),
@@ -145,13 +148,11 @@ def MODEL(model_name,
                 tf.summary.scalar('dist_loss', dist_loss)
                 losses.append(dist_loss)
         # """
-        
 
     else:
         losses = tf.losses.softmax_cross_entropy(label, end_points['Logits'])
         accuracy = slim.metrics.accuracy(
             tf.to_int32(tf.argmax(end_points['Logits'], 1)),
             tf.to_int32(tf.argmax(label, 1)))
-
 
     return losses, accuracy

@@ -17,29 +17,26 @@ from utils import distillation_learning_rate, GET_dataset, sigmoid, MODEL, _get_
 # config = tf.ConfigProto()
 # config.gpu_options.per_process_gpu_memory_fraction = 0.5
 
+# TF显示的警告信息级别
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ['CUDA_VISIBLE_DEVICES']='0'
-# export CUDA_VISIBLE_DEVICES=1
+# 限制TF对哪些GPU可见，或终端使用export CUDA_VISIBLE_DEVICES=1
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-# train_dir   =  '/home/dmsl/Documents/tf/svd/VGG/VGG'
-# train_dir = 'output_origin_ts'
+# 训练后保存目录，如果终止也可以继续运行此py文件来继续训练。若重新训练，需清空此文件夹
 train_dir = 'output_MobileNet'
 
-# dataset_dir = '/home/dmsl/Documents/data/tf/cifar100'
+# 数据集目录
 dataset_dir = 'cifar-100-python'
-# dataset_dir = '/home/lujianghu/SSKD_SVD/datasets/cifar-100-python-16-3'
-
+# 数据集名称
 dataset_name = 'cifar100'
-# model_name = ['VGG', 'VGG_teacher', 'MobileNet', 'ResNext']
+# 网络选择，['VGG', 'VGG_teacher', 'MobileNet', 'ResNext']
 model_name = 'MobileNet'
-# model_name   = 'VGG16'
-
+# 同数据集，预处理数据集
 preprocessing_name = 'cifar100'
-
+# 优化器
 Optimizer = 'sgd'  # 'adam' or 'sgd'
-# Learning_rate = 1e-4
+# 学习率，每50epoch，下降0.1
 Learning_rate = 1e-2
-
 
 batch_size = 128
 # batch_size = 512
@@ -56,7 +53,7 @@ ignore_missing_vars = True
 tf.logging.set_verbosity(tf.logging.INFO)
 
 with tf.Graph().as_default() as graph:
-    # Load Dataset
+    # 载入数据集
     epoch, global_step, dataset, image, label = GET_dataset(
         dataset_name, dataset_dir, batch_size, preprocessing_name, 'train')
     _, _, val_dataset, val_image, val_label = GET_dataset(
@@ -66,6 +63,7 @@ with tf.Graph().as_default() as graph:
         max_number_of_steps = int(dataset.num_samples / batch_size *
                                   (num_epoch))
 
+    # 训练
     total_loss, train_accuracy = MODEL(model_name, weight_decay, image, label,
                                        Learning_rate, epoch, True, False)
 
@@ -76,8 +74,8 @@ with tf.Graph().as_default() as graph:
         Learning_rate, epoch, init_epoch),
                                            0.9,
                                            use_nesterov=True)
+    # 梯度剪枝
     gradient0 = optimizer.compute_gradients(total_loss[0], var_list=variables)
-    # """
     gradient1 = optimizer.compute_gradients(total_loss[1], var_list=variables)
     with tf.variable_scope('clip_grad1'):
         for i, grad in enumerate(gradient1):
@@ -88,15 +86,15 @@ with tf.Graph().as_default() as graph:
                 gradient0[i] = (gradient0[i][0] +
                                 tf.clip_by_norm(grad[0], norm),
                                 gradient0[i][1])
-    # """
     update_ops.append(
         optimizer.apply_gradients(gradient0, global_step=global_step))
     update_op = tf.group(*update_ops)
+    # 开始训练
     train_op = control_flow_ops.with_dependencies([update_op],
                                                   tf.add_n(total_loss),
                                                   name='train_op')
-    
 
+    # 验证
     val_loss, val_accuracy = MODEL(model_name, weight_decay, val_image,
                                    val_label, Learning_rate, epoch, False,
                                    False)
@@ -166,6 +164,7 @@ with tf.Graph().as_default() as graph:
         save_interval_secs=0
     )  #'The frequency with which the model is saved, in seconds.'
 """
+# 载入TF保存的模型
 import tensoflow as tf
 from tensorflow.python import pywrap_tensorflow
  

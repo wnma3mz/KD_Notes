@@ -1,13 +1,18 @@
-# Self-supervised Knowledge Distillation using Singular Value Decomposition
+## 知识蒸馏结合SVD进行模型压缩
 
 所有内容均来源于https://github.com/sseung0703/SSKD_SVD
-本项目基于仅做了些许更改与笔记，作为备份，感谢作者的开源代码。
+基于项目仅做了些许更改与笔记，感谢作者的开源代码（Tensorflow）。原论文：[Self-supervised Knowledge Distillation using Singular Value Decomposition](https://arxiv.org/abs/1807.06819)
+
+有以下几点需注意：
+
+1. 作者在这里使用MoblieNet和ResNext时，并未训练原始模型
+2. 这里用的知识蒸馏并没有完全照搬Hintion的思路，而只是作为知识（网络）迁移的一种手段。直接来说，教师和学生网络之间的损失是来源于feature map的一种计算，而不是简单对输出做KL散度计算。
 
 ![Alt text](dist.png)
 ## Feature
 - Define knowledge by Singular value decomposition
 - Fast and efficient learning by multi-task learning
- 
+
 ## Requirments
 - Tensorflow
 - Scipy

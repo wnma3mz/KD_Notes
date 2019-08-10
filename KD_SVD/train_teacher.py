@@ -14,7 +14,7 @@ from preprocessing import preprocessing_factory
 from utils import distillation_learning_rate, GET_dataset, sigmoid, _get_init_fn, MODEL
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ['CUDA_VISIBLE_DEVICES']='4'
+os.environ['CUDA_VISIBLE_DEVICES'] = '4'
 
 # train_dir   =  '/home/dmsl/Documents/tf/svd/VGG/VGG'
 # dataset_dir = '/home/dmsl/Documents/data/tf/cifar100'
@@ -69,11 +69,12 @@ with tf.Graph().as_default() as graph:
     update_ops.append(op)
     update_op = tf.group(*update_ops)
     train_op = cfo.with_dependencies([update_op],
-                                 tf.add_n(total_loss),
-                                 name='train_op')
+                                     tf.add_n(total_loss),
+                                     name='train_op')
 
     val_loss, val_accuracy = MODEL(model_name, weight_decay, val_image,
-                                   val_label, Learning_rate, epoch, False, True)
+                                   val_label, Learning_rate, epoch, False,
+                                   True)
 
     summaries = set(tf.get_collection(tf.GraphKeys.SUMMARIES))
     summary_op = tf.summary.merge(list(summaries), name='summary_op')

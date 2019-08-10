@@ -66,8 +66,7 @@ def VGG(image,
                                    trainable=is_training,
                                    reuse=val)
             std2 = slim.max_pool2d(std2, [2, 2], 2, scope='poola')
-        
-        
+
         with tf.variable_scope('block3'):
             std3 = std2
             for i in range(1):
@@ -81,8 +80,6 @@ def VGG(image,
                                    reuse=val)
             std3 = slim.max_pool2d(std3, [2, 2], 2, scope='poola')
         fc = tf.contrib.layers.flatten(std3)
-        
-        
 
         # fc = tf.contrib.layers.flatten(std2)
         #        fc = slim.fully_connected(fc, 1024, activation_fn=tf.nn.relu,
@@ -117,60 +114,54 @@ def VGG(image,
                 with tf.variable_scope('block0'):
                     teach0 = image
                     for i in range(2):
-                        teach0 = slim.conv2d(
-                            teach0,
-                            64, [3, 3],
-                            1,
-                            padding='SAME',
-                            activation_fn=tf.nn.relu,
-                            scope='conv%d' % i,
-                            trainable=online_learning,
-                            reuse=val)
+                        teach0 = slim.conv2d(teach0,
+                                             64, [3, 3],
+                                             1,
+                                             padding='SAME',
+                                             activation_fn=tf.nn.relu,
+                                             scope='conv%d' % i,
+                                             trainable=online_learning,
+                                             reuse=val)
                     teach0 = slim.max_pool2d(teach0, [2, 2], 2, scope='pool')
 
                 with tf.variable_scope('block1'):
                     teach1 = teach0
                     for i in range(2):
-                        teach1 = slim.conv2d(
-                            teach1,
-                            128, [3, 3],
-                            1,
-                            padding='SAME',
-                            activation_fn=tf.nn.relu,
-                            scope='conv%d' % i,
-                            trainable=online_learning,
-                            reuse=val)
+                        teach1 = slim.conv2d(teach1,
+                                             128, [3, 3],
+                                             1,
+                                             padding='SAME',
+                                             activation_fn=tf.nn.relu,
+                                             scope='conv%d' % i,
+                                             trainable=online_learning,
+                                             reuse=val)
                     teach1 = slim.max_pool2d(teach1, [2, 2], 2, scope='pool')
 
                 with tf.variable_scope('block2'):
                     teach2 = teach1
                     for i in range(3):
-                        teach2 = slim.conv2d(
-                            teach2,
-                            256, [3, 3],
-                            1,
-                            padding='SAME',
-                            activation_fn=tf.nn.relu,
-                            scope='conv%d' % i,
-                            trainable=online_learning,
-                            reuse=val)
+                        teach2 = slim.conv2d(teach2,
+                                             256, [3, 3],
+                                             1,
+                                             padding='SAME',
+                                             activation_fn=tf.nn.relu,
+                                             scope='conv%d' % i,
+                                             trainable=online_learning,
+                                             reuse=val)
                     teach2 = slim.max_pool2d(teach2, [2, 2], 2, scope='pool')
 
-                
                 with tf.variable_scope('block3'):
                     teach3 = teach2
                     for i in range(3):
-                        teach3 = slim.conv2d(
-                            teach3,
-                            512, [3, 3],
-                            1,
-                            padding='SAME',
-                            activation_fn=tf.nn.relu,
-                            scope='conv%d' % i,
-                            trainable=online_learning,
-                            reuse=val)
+                        teach3 = slim.conv2d(teach3,
+                                             512, [3, 3],
+                                             1,
+                                             padding='SAME',
+                                             activation_fn=tf.nn.relu,
+                                             scope='conv%d' % i,
+                                             trainable=online_learning,
+                                             reuse=val)
                     teach3 = slim.max_pool2d(teach3, [2, 2], 2, scope='pool')
-                
 
                 # S-DNN的每层输出与T-DNN的每层输出都进行SVD
                 end_points['Dist'] = RAS([std0, std1, std2, std3],
@@ -180,6 +171,7 @@ def VGG(image,
 
     end_points['Logits'] = logits
     return end_points
+
+
 # VGG.default_image_size = 32
 VGG.default_image_size = 16
-

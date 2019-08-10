@@ -55,8 +55,7 @@ def preprocess_image(image, is_training):
 
             tf.summary.image('aug_img', tf.expand_dims(image, 0))
         # else:
-            # image = tf.image.resize_images(image, (16, 16), method=1)
-            # image = tf.image.resize_images(image, (32, 32), method=1)
+        # image = tf.image.resize_images(image, (16, 16), method=1)
+        # image = tf.image.resize_images(image, (32, 32), method=1)
 
-        
         return image
