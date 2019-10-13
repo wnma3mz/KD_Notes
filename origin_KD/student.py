@@ -110,7 +110,7 @@ net = CNN()
 net = nn.DataParallel(net, device_ids=device_ids).cuda()
 
 criterion = nn.CrossEntropyLoss()
-criterion2 = nn.KLDivLoss()  # 相对熵
+criterion2 = nn.KLDivLoss(reduction='sum')  # 相对熵
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # 载入教师模型
