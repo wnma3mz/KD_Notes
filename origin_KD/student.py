@@ -155,8 +155,10 @@ for epoch in range(3):
         # We found that the best results were generally obtained by using a condiderably lower weight on the second objective function. Since the magnitudes of the gradients produced by the soft targets scale as 1/T 2 it is important to multiply them by T 2 when using both hard and soft targets. This ensures that the relative contributions of the hard and soft targets remain roughly unchanged if the temperature used for distillation is changed while experimenting with meta-parameters.
         # 在第二目标函数上使用一定的低weight可获取最好结果。soft target的scale为1/(T^2)，所以最后需要*(T^2)。这样保证了在调整T时，soft target和hard target相对贡献不变
         loss2 = criterion2(outputs_S, outputs_T) * T * T
-        # loss = F.kl_div(outputs_S, outputs_T, reduction='batchmean')
         loss = loss1 * (1 - alpha) + loss2 * alpha
+        # loss = -(F.softmax(out_t / temperature, 1).detach() * \
+        #         (F.log_softmax(out_s / temperature, 1) - \
+        #          F.log_softmax(out_t / temperature, 1).detach())).sum()
         loss.backward()
         optimizer.step()
 
