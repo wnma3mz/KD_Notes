@@ -12,7 +12,8 @@ from torchvision.datasets import CIFAR10
 
 from Nets import BasicBlock, Bottleneck, ResNet
 from utils import evlation
-
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 class _ConvLayer(nn.Sequential):
     def __init__(self, num_input_features, num_output_features, drop_rate):
