@@ -111,7 +111,9 @@ net = CNN()
 net = nn.DataParallel(net, device_ids=device_ids).cuda()
 
 criterion = nn.CrossEntropyLoss()
-criterion2 = nn.KLDivLoss(reduction='sum')  # 相对熵
+# mean会warning，batchmean的性能可能不如mean
+# criterion2 = nn.KLDivLoss(reduction='batchmean')
+criterion2 = nn.KLDivLoss(reduction='mean')  # 相对熵
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # 载入教师模型
